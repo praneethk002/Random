@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import lottie, { AnimationItem } from 'lottie-web';
 import spinnerData from '../../assets/lottie/spinner.json';
 import { TagInput } from '../ui/TagInput';
@@ -49,15 +48,16 @@ const AVOID_SUGGESTIONS = [
 
 interface ScreenPreferencesProps {
   onBack: () => void;
-  onSubmit: () => void;
+  onSubmit: (prefs: { restrictions: string[] }) => Promise<void>;
+  error?: string | null;
 }
 
-export default function ScreenPreferences({ onBack, onSubmit: _onSubmit }: ScreenPreferencesProps) {
-  const navigate = useNavigate();
+export default function ScreenPreferences({ onBack, onSubmit, error }: ScreenPreferencesProps) {
   const [restrictions, setRestrictions] = useState<string[]>([]);
   const [_enjoyTags, setEnjoyTags] = useState<Tag[]>([]);
   const [avoidTags, setAvoidTags] = useState<Tag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const lottieAnim = useRef<AnimationItem | null>(null);
 
   useEffect(() => {
@@ -116,13 +116,16 @@ export default function ScreenPreferences({ onBack, onSubmit: _onSubmit }: Scree
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      console.log('Navigating to results...');
-      navigate('/results');
-      window.location.href = '/results';
-    }, 500);
+    setSubmitError(null);
+    try {
+      await onSubmit({ restrictions });
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -190,6 +193,9 @@ export default function ScreenPreferences({ onBack, onSubmit: _onSubmit }: Scree
           </span>
         </button>
         <div id="lottie-spinner" className={`submit-spinner${isSubmitting ? ' submit-spinner--visible' : ''}`} aria-hidden="true" />
+      {(submitError || error) && (
+        <p className="screen-pref__error">{submitError ?? error}</p>
+      )}
       </div>
 
       <div className="screen-pref__back">

@@ -1,0 +1,154 @@
+/* ScreenGoal.css — Screen 1: Goal Selection
+   No hardcoded hex. All colours from tokens.css. */
+
+.screen-goal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.screen-goal__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.screen-goal__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: calc(-1 * var(--space-4)) 0 0;
+}
+
+.screen-goal__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.goal-card:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 32px rgba(13, 148, 136, 0.12);
+  border-color: rgba(13, 148, 136, 0.4);
+}
+
+.goal-card--selected {
+  background: var(--color-teal-light);
+  border: 2px solid var(--color-teal);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.goal-card--selected:hover {
+  transform: scale(1.06);
+  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.2);
+}
+
+.goal-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  transition: transform 200ms ease, filter 200ms ease, color 200ms ease;
+}
+
+.goal-card:hover .goal-card__icon {
+  transform: scale(1.15);
+}
+
+.goal-card--selected .goal-card__icon {
+  color: var(--color-teal);
+  filter: drop-shadow(0 0 6px var(--color-teal));
+}
+
+.goal-card__label {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.goal-card__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.screen-goal__nav {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Shared button styles (used across all screens) */
+.btn {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--color-teal);
+  color: #ffffff;
+}
+
+.btn--primary:not(:disabled):hover {
+  background: var(--color-teal-dark);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn--ghost:hover {
+  background: var(--color-neutral-100);
+}
+
+.btn--submit {
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-teal);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn--submit:hover {
+  background: var(--color-teal-dark);
+}

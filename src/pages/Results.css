@@ -1,0 +1,118 @@
+.results {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Offset for fixed Nav (64px) + breathing room */
+  padding: calc(var(--space-16) + var(--space-12)) var(--space-6) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+/* Hero row — check icon + heading + download button */
+.results__hero-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.results__success-icon {
+  flex-shrink: 0;
+}
+
+.results__hero-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.results__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.results__subheading {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-teal);
+  margin: 0;
+}
+
+/* Download button */
+.results__download-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.results__download-btn:hover {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+}
+
+/* KPI row — 3-column equal grid */
+.results__kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+/* Section wrapper */
+.results__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.results__section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .results__hero-row {
+    flex-wrap: wrap;
+  }
+
+  .results__kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .nav,
+  .results__download-btn {
+    display: none;
+  }
+
+  .results {
+    padding: 0;
+  }
+
+  body {
+    background: white;
+  }
+
+  .kpi-card,
+  .results__section {
+    break-inside: avoid;
+  }
+}

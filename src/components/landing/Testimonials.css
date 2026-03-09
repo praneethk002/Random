@@ -1,0 +1,245 @@
+/* ── Testimonials section ── */
+.testimonials {
+  padding: var(--space-32) var(--space-12);
+  background: linear-gradient(
+    160deg,
+    var(--color-teal-light) 0%,
+    transparent 40%,
+    rgba(124, 58, 237, 0.04) 100%
+  );
+  border-top: 1px solid var(--color-border);
+  position: relative;
+}
+
+.testimonials__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+/* Eyebrow */
+.testimonials__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-teal);
+  margin: 0 0 var(--space-3);
+  display: block;
+}
+
+/* Heading */
+.testimonials__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+/* ── Slider shell (always visible) ── */
+.testimonials__slider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/* ── Track: clips the animated page ── */
+.testimonials__track {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 260px;
+}
+
+/* ── Page: CSS grid whose column count is set via inline style ── */
+.testimonials__page {
+  display: grid;
+  gap: var(--space-6);
+  align-items: stretch;
+  width: 100%;
+}
+
+/* ── Card ── */
+.testimonials__card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Quote icon ── */
+.testimonials__quote-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-2);
+  opacity: 0.35;
+}
+
+.testimonials__quote-icon--teal {
+  color: var(--color-teal);
+}
+
+.testimonials__quote-icon--purple {
+  color: var(--color-purple);
+}
+
+/* ── Quote text ── */
+.testimonials__quote {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: italic;
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+/* ── Meta row (avatar + author) ── */
+.testimonials__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ── Avatar circle ── */
+.testimonials__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.testimonials__avatar--teal {
+  background-color: var(--color-teal-light);
+  color: var(--color-teal);
+}
+
+.testimonials__avatar--purple {
+  background-color: rgba(124, 58, 237, 0.08);
+  color: var(--color-purple);
+}
+
+/* ── Author block ── */
+.testimonials__author {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.testimonials__name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* ── Tag pill ── */
+.testimonials__tag {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.testimonials__tag--teal {
+  background-color: var(--color-teal-light);
+  color: var(--color-teal);
+}
+
+.testimonials__tag--purple {
+  background-color: rgba(124, 58, 237, 0.08);
+  color: var(--color-purple);
+}
+
+/* ── Chevron buttons ── */
+.testimonials__chevron {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.testimonials__chevron--left:hover {
+  color: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.testimonials__chevron--right:hover {
+  color: var(--color-purple);
+  border-color: var(--color-purple);
+}
+
+/* ── Dot indicators (one per page) ── */
+.testimonials__dots {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+.testimonials__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.testimonials__dot--teal {
+  background-color: var(--color-teal);
+  opacity: 0.3;
+}
+
+.testimonials__dot--purple {
+  background-color: var(--color-purple);
+  opacity: 0.3;
+}
+
+.testimonials__dot--active {
+  opacity: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .testimonials {
+    padding: var(--space-20) var(--space-6);
+  }
+
+  .testimonials__track {
+    min-height: 300px;
+  }
+}

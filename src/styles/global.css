@@ -1,0 +1,31 @@
+/* global.css — Base document styles for OptiFit
+   All colour references use CSS custom properties from tokens.css.
+   No hardcoded hex values permitted in this file. */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  line-height: var(--leading-tight);
+  font-weight: var(--font-weight-bold);
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--font-mono);
+}
+

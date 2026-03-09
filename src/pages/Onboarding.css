@@ -1,0 +1,48 @@
+/* Onboarding.css — OptiFit Onboarding Page
+   Full-viewport step layout. No hardcoded hex values.
+   All colours and spacing from tokens.css custom properties. */
+
+.onboarding {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Offset for Nav (64px) + progress bar (4px) + breathing room */
+  padding-top: calc(var(--space-16) + 4px + var(--space-8));
+  padding-bottom: var(--space-8);
+}
+
+.onboarding__card {
+  width: 100%;
+  max-width: 640px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  overflow-y: auto;
+  max-height: calc(100vh - var(--space-16) - 4px - var(--space-16));
+}
+
+.onboarding__nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.onboarding__placeholder {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.onboarding__placeholder-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

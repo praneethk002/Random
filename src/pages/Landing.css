@@ -1,0 +1,6 @@
+/* Landing page wrapper — replaces temporary inline style={{ minHeight: '200vh' }} */
+.page-landing {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

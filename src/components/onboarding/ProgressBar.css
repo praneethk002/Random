@@ -1,0 +1,25 @@
+/* ProgressBar.css — OptiFit Onboarding Progress Bar
+   Fixed strip below Nav. z-index: 99 (Nav is 100).
+   No hardcoded hex — all colours from tokens.css. */
+
+.progress-bar {
+  position: fixed;
+  top: var(--space-16);   /* 64px — flush below Nav height */
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 99;
+  background-color: var(--color-border);
+  display: flex;
+  gap: 2px;
+}
+
+.progress-bar__segment {
+  flex: 1;
+  background-color: var(--color-border);
+  transition: background-color 0.2s ease;
+}
+
+.progress-bar__segment--filled {
+  background-color: var(--color-teal);
+}

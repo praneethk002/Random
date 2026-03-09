@@ -1,0 +1,143 @@
+/* FeatureCards — stacked skew animation, OptiFit design system only */
+
+.feature-cards-grid {
+  display: grid;
+  grid-template-areas: "stack";
+  place-items: center;
+}
+
+/* ── Shared card base ──────────────────────────────────────────── */
+.feature-card {
+  grid-area: stack;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 22rem;
+  height: 9rem;
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-surface);
+  backdrop-filter: blur(4px);
+  transform: skewY(-8deg);
+  user-select: none;
+  transition: transform 0.7s ease, border-color 0.7s ease, background-color 0.7s ease;
+}
+
+/* Fade-out overlay for back/mid cards (via ::after) */
+.feature-card::after {
+  content: "";
+  position: absolute;
+  top: -5%;
+  right: -4px;
+  width: 20rem;
+  height: 110%;
+  background: linear-gradient(to left, var(--color-bg), transparent);
+  pointer-events: none;
+}
+
+.feature-card:hover {
+  border-color: var(--color-teal);
+  background-color: var(--color-surface);
+}
+
+/* ── Header row ─────────────────────────────────────────────────── */
+.feature-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.feature-card__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background-color: var(--color-teal-light);
+}
+
+.feature-card__icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-teal);
+}
+
+.feature-card__title {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-teal);
+}
+
+/* ── Description ────────────────────────────────────────────────── */
+.feature-card__description {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* ── Stacking positions ─────────────────────────────────────────── */
+
+/* Back card — greyed out, lifts on hover */
+.feature-card--back {
+  filter: grayscale(100%);
+  transition: filter 0.7s ease, transform 0.7s ease;
+}
+
+.feature-card--back::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  background-color: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+
+.feature-card--back:hover {
+  transform: skewY(-8deg) translateY(-2.5rem);
+  filter: grayscale(0%);
+}
+
+.feature-card--back:hover::before {
+  opacity: 0;
+}
+
+/* Mid card — offset, greyed out, minimal lift on hover */
+.feature-card--mid {
+  transform: skewY(-8deg) translateX(4rem) translateY(2.5rem);
+  filter: grayscale(100%);
+  transition: filter 0.7s ease, transform 0.7s ease;
+}
+
+.feature-card--mid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  background-color: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  transition: opacity 0.7s ease;
+  pointer-events: none;
+}
+
+.feature-card--mid:hover {
+  transform: skewY(-8deg) translateX(4rem) translateY(-0.25rem);
+  filter: grayscale(0%);
+}
+
+.feature-card--mid:hover::before {
+  opacity: 0;
+}
+
+/* Front card — most offset, no overlay, settles on hover */
+.feature-card--front {
+  transform: skewY(-8deg) translateX(8rem) translateY(5rem);
+  transition: transform 0.7s ease;
+}
+
+.feature-card--front:hover {
+  transform: skewY(-8deg) translateX(8rem) translateY(2.5rem);
+}

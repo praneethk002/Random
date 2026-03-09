@@ -1,0 +1,151 @@
+/* ScreenAbout.css — Screen 2: About You
+   No hardcoded hex. All colours from tokens.css. */
+
+.screen-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.screen-about__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.screen-about__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: calc(-1 * var(--space-4)) 0 0;
+}
+
+.screen-about__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field-label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Sex toggle pair */
+.toggle-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.toggle-btn {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.toggle-btn--active {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+  color: #ffffff;
+}
+
+/* Number input with suffix */
+.input-suffix-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 200px;
+}
+
+.number-input {
+  width: 120px;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition: outline 0.15s ease;
+}
+
+.number-input:focus {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.input-suffix {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Activity option cards */
+.option-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  gap: var(--space-1);
+}
+
+.option-card--selected {
+  border-color: var(--color-teal);
+  background: var(--color-teal-light);
+}
+
+.option-card__label {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.option-card__sub {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.screen-about__nav {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}

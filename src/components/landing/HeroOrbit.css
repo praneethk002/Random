@@ -1,0 +1,74 @@
+/* ── HeroOrbit wrapper ── */
+.hero-orbit {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  min-width: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .hero-orbit {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1024px) {
+  .hero-orbit {
+    transform: scale(0.75);
+    transform-origin: right center;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .hero-orbit {
+    transform: scale(0.9);
+    transform-origin: right center;
+  }
+}
+
+/* ── Stars ── */
+.hero-orbit__stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ho-star {
+  position: absolute;
+  border-radius: 50%;
+  animation: ho-twinkle ease-in-out infinite alternate;
+}
+
+.ho-star--teal   { background: var(--color-teal); }
+.ho-star--purple { background: var(--color-purple); }
+
+@keyframes ho-twinkle {
+  from { transform: scale(1); }
+  to   { transform: scale(1.4); opacity: 0 !important; }
+}
+
+/* ── SVG ── */
+.hero-orbit__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── Centre pulse ── */
+.ho-centre-group {
+  animation: ho-pulse 3s ease-in-out infinite;
+  transform-origin: 280px 280px;
+  transform-box: fill-box;
+}
+
+@keyframes ho-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.07); }
+}

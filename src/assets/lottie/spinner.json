@@ -1,0 +1,13 @@
+{
+  "v": "5.9.6",
+  "fr": 30,
+  "ip": 0,
+  "op": 60,
+  "w": 96,
+  "h": 96,
+  "nm": "OptiFit Loading Spinner",
+  "ddd": 0,
+  "assets": [],
+  "layers": [],
+  "__comment": "Placeholder — Praneeth replaces with final Lottie JSON and wires loadAnimation() into #lottie-spinner"
+}

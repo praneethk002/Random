@@ -1,0 +1,84 @@
+/* FooterCTA — always var(--color-text-primary) background, never alternating */
+.footer-cta {
+  width: 100%;
+  background: linear-gradient(to bottom, rgba(13,148,136,0.15) 0%, transparent 30%), var(--color-text-primary);
+  padding: var(--space-20) var(--space-12);
+  text-align: center;
+  color: white;
+}
+
+.footer-cta h2,
+.footer-cta p,
+.footer-cta__heading,
+.footer-cta__sub {
+  color: white;
+}
+
+.footer-cta__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.footer-cta__title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: var(--leading-tight);
+  color: var(--color-surface);
+  margin: 0;
+}
+
+.footer-cta__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  color: var(--color-surface);
+  opacity: 0.45;
+  margin: 0;
+}
+
+.footer-cta__btn {
+  font-size: 16px;
+  padding: var(--space-4) var(--space-10);
+}
+
+/* Slim footer bar */
+/* rgba(255, 255, 255, 0.07) is a documented exception — alpha token not available in tokens.css.
+   Same pattern as rgba(255,255,255,0.92) used in Nav.css for frosted-glass background. */
+.site-footer {
+  background-color: var(--color-text-primary);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.site-footer__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-footer__logo {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.site-footer__logo-opti {
+  color: var(--color-teal);
+}
+
+.site-footer__logo-fit {
+  color: var(--color-surface);
+  opacity: 0.5;
+}
+
+.site-footer__copy {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-surface);
+  opacity: 0.25;
+}

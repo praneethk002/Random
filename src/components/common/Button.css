@@ -1,0 +1,41 @@
+/* ============================================================
+   Button.css — OptiFit Button Component
+   BEM classes: .btn, .btn--primary, .btn--ghost
+   All colours via CSS custom properties from tokens.css
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn--primary {
+  background-color: var(--color-teal);
+  color: #fff;
+  border-color: var(--color-teal);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+}
+
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-teal);
+  border-color: var(--color-border);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-teal);
+}

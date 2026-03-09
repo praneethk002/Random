@@ -1,0 +1,114 @@
+.tag-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-input__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+  display: block;
+}
+
+.tag-input__field {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: var(--space-2);
+  min-height: 42px;
+}
+
+.tag-input__field:focus-within {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+.tag-input__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.tag-input__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-teal-light);
+  color: var(--color-teal);
+  border: 1px solid var(--color-teal);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.tag-input__tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-teal);
+  padding: 0;
+  line-height: 1;
+  font-size: var(--text-base);
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-input__tag-remove:hover {
+  color: var(--color-teal-dark);
+}
+
+.tag-input__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  min-width: 120px;
+  flex: 1;
+  font-family: inherit;
+}
+
+.tag-input__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.tag-input__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1);
+  z-index: 50;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tag-input__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+}
+
+.tag-input__dropdown-item:hover {
+  background: var(--color-teal-light);
+}
+
+.tag-input__dropdown-check {
+  width: 16px;
+  color: var(--color-teal);
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}

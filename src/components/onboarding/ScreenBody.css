@@ -1,0 +1,191 @@
+/* ScreenBody.css — Screen 3: Plan Numbers
+   No hardcoded hex. All colours from tokens.css. */
+
+.screen-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.screen-body__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.screen-body__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: calc(-1 * var(--space-4)) 0 0;
+}
+
+.screen-body__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field-label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.input-suffix-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.number-input {
+  width: 120px;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition: outline 0.15s ease;
+}
+
+.number-input:focus {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.input-suffix {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Weight gap */
+.weight-gap {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+}
+
+.weight-gap--lose {
+  color: var(--color-teal);
+}
+
+.weight-gap--gain {
+  color: var(--color-purple);
+}
+
+/* Day grid */
+.day-grid {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.day-pill {
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.day-pill--active {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+  color: #ffffff;
+}
+
+.days-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-teal);
+  margin: 0;
+}
+
+/* Session options */
+.option-cards-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.option-chip {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.option-chip--selected {
+  border-color: var(--color-teal);
+  background: var(--color-teal-light);
+}
+
+/* Week warning */
+.week-warning {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+  margin: var(--space-1) 0 0;
+  line-height: var(--leading-relaxed);
+}
+
+/* Label row with Select all toggle */
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.select-all-btn {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-teal);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.select-all-btn:hover {
+  color: var(--color-teal-dark);
+}
+
+.screen-body__nav {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}

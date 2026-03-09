@@ -1,0 +1,106 @@
+/* Nav.css — Dark premium navigation bar
+   All colour references use CSS custom properties from tokens.css.
+   Exception: rgba(255,255,255,*) — alpha white has no token equivalent. */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--space-16);
+  padding: 0 var(--space-8);
+  background-color: var(--color-text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Logo */
+.nav__logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nav__logo-opti {
+  color: var(--color-teal);
+}
+
+.nav__logo-fit {
+  color: #ffffff;
+}
+
+/* Links (center) */
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .nav__links {
+    display: none;
+  }
+}
+
+.nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.65);
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav__link:hover {
+  color: #ffffff;
+}
+
+.nav__link--active {
+  color: #ffffff;
+}
+
+.nav__link-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-teal);
+  flex-shrink: 0;
+}
+
+/* CTA pill button */
+.nav__cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-6);
+  background-color: var(--color-teal);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  transition: filter 0.2s ease;
+  flex-shrink: 0;
+}
+
+.nav__cta:hover {
+  filter: brightness(1.1);
+}

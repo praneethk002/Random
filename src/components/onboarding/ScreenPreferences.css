@@ -115,3 +115,10 @@
   display: flex;
   justify-content: flex-start;
 }
+
+.screen-pref__error {
+  color: #ff6b6b;
+  font-size: 13px;
+  margin-top: 8px;
+  text-align: center;
+}

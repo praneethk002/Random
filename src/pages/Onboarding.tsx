@@ -12,7 +12,7 @@ const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5h
 const GOAL_MAP: Record<GoalType, string> = {
   weight_loss: 'weight_loss',
   muscle_gain: 'muscle_gain',
-  body_recomposition: 'time_min',
+  body_recomposition: 'body_recomposition',
 };
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 

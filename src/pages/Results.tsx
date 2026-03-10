@@ -25,7 +25,17 @@ import {
 import { staggerContainer, staggerChild, cardStagger, cardChild } from '../tokens/variants';
 import './Results.css';
 
-// ── API response shape (matches frozen contract from POST /api/optimise) ──
+// ── API response shape (matches contract from POST /api/optimise) ──
+
+interface ApiMealItem {
+  meal: string; food: string; grams: number;
+  calories: number; protein: number; carbs: number; fat: number;
+}
+
+interface ApiWorkoutEntry {
+  exercise: string; sets: number; reps: number;
+  duration_min: number; muscle_group: string;
+}
 
 interface ApiResponse {
   summary: {
@@ -34,13 +44,9 @@ interface ApiResponse {
     weekly_food_cost: number;
     weekly_gym_hours: number;
   };
-  meal_plan: Array<{
-    food: string; grams: number; calories: number;
-    protein: number; carbs: number; fat: number; cost: number;
-  }>;
-  workout_schedule: Record<string, { type: string; duration: number; calories_burned: number }>;
-  macros: { protein: number; carbs: number; fat: number };
-  projection: Array<{ week: number; weight: number }>;
+  meal_plan: Record<string, ApiMealItem[]>;
+  workout_schedule: Record<string, ApiWorkoutEntry[]>;
+  projection: Array<{ week: number; weight_kg: number }>;
 }
 
 // ── Transform helpers ──
@@ -58,8 +64,10 @@ function transformResponse(api: ApiResponse) {
     weekly_gym_hours: api.summary.weekly_gym_hours,
   };
 
-  const meals: MealItem[] = api.meal_plan.map((item, i) => ({
-    meal: MEAL_NAMES[i % MEAL_NAMES.length],
+  // meal_plan is keyed by day; flatten to a single list
+  const allMealItems = Object.values(api.meal_plan).flat();
+  const meals: MealItem[] = allMealItems.map((item) => ({
+    meal: item.meal,
     food: item.food,
     grams: item.grams,
     calories: item.calories,
@@ -72,32 +80,35 @@ function transformResponse(api: ApiResponse) {
     monday: null, tuesday: null, wednesday: null, thursday: null,
     friday: null, saturday: null, sunday: null,
   };
-  for (const [day, entry] of Object.entries(api.workout_schedule)) {
+  for (const [day, entries] of Object.entries(api.workout_schedule)) {
     const key = DAY_KEYS[day];
-    if (!key) continue;
-    if (entry.type !== 'rest') {
-      schedule[key] = [{
-        exercise: entry.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-        sets: 3,
-        reps: '10–12',
-        duration_min: Math.round(entry.duration * 60),
-        muscle_group: entry.type,
-      }];
-    }
+    if (!key || !entries.length) continue;
+    schedule[key] = entries.map((e) => ({
+      exercise: e.exercise,
+      sets: e.sets,
+      reps: String(e.reps),
+      duration_min: e.duration_min,
+      muscle_group: e.muscle_group,
+    }));
   }
 
-  const macroTotal = api.macros.protein + api.macros.carbs + api.macros.fat;
+  // Compute macro totals from Monday's meals (representative day)
+  const mondayItems = api.meal_plan['monday'] ?? allMealItems;
+  const totalProtein = mondayItems.reduce((s, i) => s + i.protein, 0);
+  const totalCarbs   = mondayItems.reduce((s, i) => s + i.carbs, 0);
+  const totalFat     = mondayItems.reduce((s, i) => s + i.fat, 0);
+  const macroTotal   = totalProtein + totalCarbs + totalFat;
   const macros: MacroData = macroTotal > 0
     ? {
-        protein_pct: Math.round((api.macros.protein / macroTotal) * 100),
-        carbs_pct:   Math.round((api.macros.carbs   / macroTotal) * 100),
-        fat_pct:     Math.round((api.macros.fat      / macroTotal) * 100),
+        protein_pct: Math.round((totalProtein / macroTotal) * 100),
+        carbs_pct:   Math.round((totalCarbs   / macroTotal) * 100),
+        fat_pct:     Math.round((totalFat      / macroTotal) * 100),
       }
     : PLACEHOLDER_MACROS;
 
   const projection: ProjectionPoint[] = api.projection.map((p) => ({
     week: p.week,
-    weight_kg: p.weight,
+    weight_kg: p.weight_kg,
   }));
 
   return { kpi, meals, schedule, macros, projection };

@@ -2,7 +2,16 @@ from __future__ import annotations
 
 from flask import Flask, jsonify, request
 
-from fitness_backend import VALID_GOALS, build_default_profile, get_model_counts, run_fitopt_pipeline
+from fitness_backend import (
+    VALID_GOALS,
+    build_default_profile,
+    get_foods_df,
+    get_exercises_df,
+    get_model_counts,
+    normalize_profile,
+    run_fitopt_pipeline,
+    run_sensitivity_extra_gym_day,
+)
 
 app = Flask(__name__)
 
@@ -25,6 +34,7 @@ def model_metadata():
 
 @app.post("/api/fitness-plan")
 @app.post("/api/optimize")
+@app.post("/api/optimise")
 def optimize_fitness_plan():
     payload = request.get_json(silent=True) or {}
     try:
@@ -40,6 +50,19 @@ def optimize_fitness_plan():
             ),
             400,
         )
+    except Exception as exc:
+        return jsonify({"error": "internal_server_error", "detail": str(exc)}), 500
+
+
+@app.post("/api/sensitivity")
+def sensitivity():
+    payload = request.get_json(silent=True) or {}
+    try:
+        profile = normalize_profile(payload)
+        result = run_sensitivity_extra_gym_day(profile, get_foods_df(), get_exercises_df())
+        return jsonify({"weeks_to_goal": result["new_weeks_to_goal"]})
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
     except Exception as exc:
         return jsonify({"error": "internal_server_error", "detail": str(exc)}), 500
 

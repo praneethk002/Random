@@ -9,6 +9,11 @@ import ScreenPreferences from '../components/onboarding/ScreenPreferences';
 import './Onboarding.css';
 
 const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5hr': 1.5 };
+const GOAL_MAP: Record<GoalType, string> = {
+  weight_loss: 'weight_loss',
+  muscle_gain: 'muscle_gain',
+  body_recomposition: 'body_recomposition',
+};
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 const SCREEN_VARIANTS = {
@@ -57,14 +62,14 @@ export default function Onboarding() {
     );
 
     const payload = {
-      goal: goal,
+      goal: GOAL_MAP[goal],
       weight_kg: parseFloat(bodyData.startWeight),
       target_kg: parseFloat(bodyData.targetWeight),
       weeks: parseInt(bodyData.weeks, 10),
       budget_day: 10,
       gym_days: bodyData.selectedDays.length,
       time_per_session: SESSION_HOURS[bodyData.sessionLength ?? '1hr'],
-      dietary_restrictions: prefs.restrictions,
+      dietary_restrictions: prefs.restrictions.map((r) => r.replace(/-/g, '_')),
       availability,
     };
 

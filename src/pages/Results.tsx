@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -24,7 +25,7 @@ import {
 import { staggerContainer, staggerChild, cardStagger, cardChild } from '../tokens/variants';
 import './Results.css';
 
-// ── Actual API response shape from POST /api/optimize ────────────────────────
+// ── API response shape (matches POST /api/optimize backend contract) ──
 
 interface ApiMealItem {
   meal: string; food: string; grams: number; calories: number;
@@ -39,16 +40,16 @@ interface ApiResponse {
   summary: {
     weeks_to_goal: number;
     daily_calories: number;
-    weekly_gym_hours: number;
     weekly_food_cost: number;
+    weekly_gym_hours: number;
   };
-  meal_plan: Record<string, ApiMealItem[]>;         // keyed by full day name e.g. "monday"
-  workout_schedule: Record<string, ApiExerciseEntry[]>; // keyed by full day name, [] = rest
+  meal_plan: Record<string, ApiMealItem[]>;
+  workout_schedule: Record<string, ApiExerciseEntry[]>;
   projection: Array<{ week: number; weight_kg: number }>;
   insights?: Array<{ text: string }>;
 }
 
-// ── Transform helpers ─────────────────────────────────────────────────────────
+// ── Transform helpers ──
 
 const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
@@ -69,7 +70,6 @@ function transformResponse(api: ApiResponse) {
     }
   }
 
-  // workout_schedule is already keyed by full day name; convert [] → null
   const schedule: WorkoutSchedule = {
     monday: null, tuesday: null, wednesday: null, thursday: null,
     friday: null, saturday: null, sunday: null,
@@ -99,18 +99,16 @@ function transformResponse(api: ApiResponse) {
       }
     : PLACEHOLDER_MACROS;
 
-  // projection already has weight_kg
   const projection: ProjectionPoint[] = api.projection;
 
-  // insights already computed by backend
-  const insights: SensitivityInsight[] | null = api.insights
+  const insights = api.insights
     ? api.insights.map((ins, i) => ({ id: String(i), text: ins.text }))
     : null;
 
   return { kpi, meals, schedule, macros, projection, insights };
 }
 
-// ── SVG success animation ─────────────────────────────────────────────────────
+// ── SVG success animation ──
 
 const CIRCLE_R = 36;
 const CIRCLE_C = 2 * Math.PI * CIRCLE_R;
@@ -142,11 +140,14 @@ function SuccessCheck() {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main component ──
 
 export default function Results() {
   const location = useLocation();
-  const routeState = location.state as { apiResponse?: ApiResponse } | null;
+  const routeState = location.state as {
+    apiResponse?: ApiResponse;
+    formPayload?: Record<string, unknown>;
+  } | null;
 
   const live = routeState?.apiResponse ? transformResponse(routeState.apiResponse) : null;
 
@@ -155,7 +156,34 @@ export default function Results() {
   const schedule   = live?.schedule   ?? PLACEHOLDER_SCHEDULE;
   const macros     = live?.macros     ?? PLACEHOLDER_MACROS;
   const projection = live?.projection ?? PLACEHOLDER_PROJECTION;
-  const insights   = live?.insights   ?? PLACEHOLDER_INSIGHTS;
+  const apiInsights = live?.insights  ?? null;
+
+  const [sensitivityInsights, setSensitivityInsights] = useState<SensitivityInsight[] | null>(null);
+  const [sensitivityLoading, setSensitivityLoading] = useState(false);
+
+  const handleSensitivity = async () => {
+    if (!routeState?.formPayload) return;
+    setSensitivityLoading(true);
+    try {
+      const res = await fetch('/api/sensitivity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(routeState.formPayload),
+      });
+      if (res.ok) {
+        const delta = await res.json() as { weeks_to_goal?: number };
+        const change = delta.weeks_to_goal != null
+          ? (delta.weeks_to_goal - kpi.weeks_to_goal).toFixed(1)
+          : null;
+        const sign = change && parseFloat(change) < 0 ? '' : '+';
+        setSensitivityInsights([
+          { id: 'gym-day', text: `+1 gym day: ${sign}${change ?? '—'} weeks to goal` },
+        ]);
+      }
+    } finally {
+      setSensitivityLoading(false);
+    }
+  };
 
   return (
     <motion.main
@@ -164,7 +192,7 @@ export default function Results() {
       initial="hidden"
       animate="visible"
     >
-      {/* Hero row */}
+      {/* Hero row — check animation + title + download */}
       <motion.div className="results__hero-row" variants={staggerChild}>
         <SuccessCheck />
         <div className="results__hero-text">
@@ -182,7 +210,11 @@ export default function Results() {
       </motion.div>
 
       {/* KPI cards */}
-      <motion.section className="results__kpi-row" aria-label="Key metrics" variants={cardStagger(0.12)}>
+      <motion.section
+        className="results__kpi-row"
+        aria-label="Key metrics"
+        variants={cardStagger(0.12)}
+      >
         <motion.div variants={cardChild}>
           <KPICard label="Weeks to Goal"    rawValue={kpi.weeks_to_goal}    decimals={1} />
         </motion.div>
@@ -216,7 +248,16 @@ export default function Results() {
 
       <motion.section className="results__section" aria-label="Sensitivity analysis" variants={staggerChild}>
         <h2 className="results__section-title">Sensitivity</h2>
-        <SensitivityPanel insights={insights} />
+        {routeState?.formPayload && (
+          <button
+            className="results__sensitivity-btn"
+            onClick={handleSensitivity}
+            disabled={sensitivityLoading}
+          >
+            {sensitivityLoading ? 'Calculating…' : 'What if I add 1 more gym day?'}
+          </button>
+        )}
+        <SensitivityPanel insights={sensitivityInsights ?? apiInsights ?? PLACEHOLDER_INSIGHTS} />
       </motion.section>
     </motion.main>
   );

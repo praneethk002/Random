@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -25,31 +24,33 @@ import {
 import { staggerContainer, staggerChild, cardStagger, cardChild } from '../tokens/variants';
 import './Results.css';
 
-// ── API response shape (matches frozen contract from POST /api/optimise) ──
+// ── Actual API response shape from POST /api/optimize ────────────────────────
+
+interface ApiMealItem {
+  meal: string; food: string; grams: number; calories: number;
+  protein: number; carbs: number; fat: number;
+}
+
+interface ApiExerciseEntry {
+  exercise: string; sets: number; reps: number; duration_min: number; muscle_group: string;
+}
 
 interface ApiResponse {
   summary: {
     weeks_to_goal: number;
     daily_calories: number;
-    weekly_food_cost: number;
     weekly_gym_hours: number;
+    weekly_food_cost: number;
   };
-  meal_plan: Array<{
-    food: string; grams: number; calories: number;
-    protein: number; carbs: number; fat: number; cost: number;
-  }>;
-  workout_schedule: Record<string, { type: string; duration: number; calories_burned: number }>;
-  macros: { protein: number; carbs: number; fat: number };
-  projection: Array<{ week: number; weight: number }>;
+  meal_plan: Record<string, ApiMealItem[]>;         // keyed by full day name e.g. "monday"
+  workout_schedule: Record<string, ApiExerciseEntry[]>; // keyed by full day name, [] = rest
+  projection: Array<{ week: number; weight_kg: number }>;
+  insights?: Array<{ text: string }>;
 }
 
-// ── Transform helpers ──
+// ── Transform helpers ─────────────────────────────────────────────────────────
 
-const DAY_KEYS: Record<string, keyof WorkoutSchedule> = {
-  Mon: 'monday', Tue: 'tuesday', Wed: 'wednesday', Thu: 'thursday',
-  Fri: 'friday', Sat: 'saturday', Sun: 'sunday',
-};
-const MEAL_NAMES = ['Breakfast', 'Snack', 'Lunch', 'Snack', 'Dinner', 'Evening'];
+const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 function transformResponse(api: ApiResponse) {
   const kpi: KPISummary = {
@@ -58,52 +59,58 @@ function transformResponse(api: ApiResponse) {
     weekly_gym_hours: api.summary.weekly_gym_hours,
   };
 
-  const meals: MealItem[] = api.meal_plan.map((item, i) => ({
-    meal: MEAL_NAMES[i % MEAL_NAMES.length],
-    food: item.food,
-    grams: item.grams,
-    calories: item.calories,
-    protein: item.protein,
-    carbs: item.carbs,
-    fat: item.fat,
-  }));
+  // Use first non-empty day for the meal table
+  let meals: MealItem[] = [];
+  for (const day of DAY_ORDER) {
+    const dayMeals = api.meal_plan[day];
+    if (dayMeals && dayMeals.length > 0) {
+      meals = dayMeals;
+      break;
+    }
+  }
 
+  // workout_schedule is already keyed by full day name; convert [] → null
   const schedule: WorkoutSchedule = {
     monday: null, tuesday: null, wednesday: null, thursday: null,
     friday: null, saturday: null, sunday: null,
   };
-  for (const [day, entry] of Object.entries(api.workout_schedule)) {
-    const key = DAY_KEYS[day];
-    if (!key) continue;
-    if (entry.type !== 'rest') {
-      schedule[key] = [{
-        exercise: entry.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-        sets: 3,
-        reps: '10–12',
-        duration_min: Math.round(entry.duration * 60),
-        muscle_group: entry.type,
-      }];
-    }
+  for (const day of DAY_ORDER) {
+    const entries = api.workout_schedule[day];
+    schedule[day] = entries && entries.length > 0
+      ? entries.map((e) => ({ ...e, reps: String(e.reps) }))
+      : null;
   }
 
-  const macroTotal = api.macros.protein + api.macros.carbs + api.macros.fat;
+  // Compute average daily macros across all days then convert to %
+  let totalP = 0, totalC = 0, totalF = 0, activeDays = 0;
+  for (const dayMeals of Object.values(api.meal_plan)) {
+    if (!dayMeals.length) continue;
+    activeDays++;
+    for (const item of dayMeals) { totalP += item.protein; totalC += item.carbs; totalF += item.fat; }
+  }
+  const d = activeDays || 1;
+  const [avgP, avgC, avgF] = [totalP / d, totalC / d, totalF / d];
+  const macroTotal = avgP + avgC + avgF;
   const macros: MacroData = macroTotal > 0
     ? {
-        protein_pct: Math.round((api.macros.protein / macroTotal) * 100),
-        carbs_pct:   Math.round((api.macros.carbs   / macroTotal) * 100),
-        fat_pct:     Math.round((api.macros.fat      / macroTotal) * 100),
+        protein_pct: Math.round((avgP / macroTotal) * 100),
+        carbs_pct:   Math.round((avgC / macroTotal) * 100),
+        fat_pct:     Math.round((avgF / macroTotal) * 100),
       }
     : PLACEHOLDER_MACROS;
 
-  const projection: ProjectionPoint[] = api.projection.map((p) => ({
-    week: p.week,
-    weight_kg: p.weight,
-  }));
+  // projection already has weight_kg
+  const projection: ProjectionPoint[] = api.projection;
 
-  return { kpi, meals, schedule, macros, projection };
+  // insights already computed by backend
+  const insights: SensitivityInsight[] | null = api.insights
+    ? api.insights.map((ins, i) => ({ id: String(i), text: ins.text }))
+    : null;
+
+  return { kpi, meals, schedule, macros, projection, insights };
 }
 
-// ── SVG success animation ──
+// ── SVG success animation ─────────────────────────────────────────────────────
 
 const CIRCLE_R = 36;
 const CIRCLE_C = 2 * Math.PI * CIRCLE_R;
@@ -135,14 +142,11 @@ function SuccessCheck() {
   );
 }
 
-// ── Main component ──
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function Results() {
   const location = useLocation();
-  const routeState = location.state as {
-    apiResponse?: ApiResponse;
-    formPayload?: Record<string, unknown>;
-  } | null;
+  const routeState = location.state as { apiResponse?: ApiResponse } | null;
 
   const live = routeState?.apiResponse ? transformResponse(routeState.apiResponse) : null;
 
@@ -151,33 +155,7 @@ export default function Results() {
   const schedule   = live?.schedule   ?? PLACEHOLDER_SCHEDULE;
   const macros     = live?.macros     ?? PLACEHOLDER_MACROS;
   const projection = live?.projection ?? PLACEHOLDER_PROJECTION;
-
-  const [sensitivityInsights, setSensitivityInsights] = useState<SensitivityInsight[] | null>(null);
-  const [sensitivityLoading, setSensitivityLoading] = useState(false);
-
-  const handleSensitivity = async () => {
-    if (!routeState?.formPayload) return;
-    setSensitivityLoading(true);
-    try {
-      const res = await fetch('/api/sensitivity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(routeState.formPayload),
-      });
-      if (res.ok) {
-        const delta = await res.json() as { weeks_to_goal?: number };
-        const change = delta.weeks_to_goal != null
-          ? (delta.weeks_to_goal - kpi.weeks_to_goal).toFixed(1)
-          : null;
-        const sign = change && parseFloat(change) < 0 ? '' : '+';
-        setSensitivityInsights([
-          { id: 'gym-day', text: `+1 gym day: ${sign}${change ?? '—'} weeks to goal` },
-        ]);
-      }
-    } finally {
-      setSensitivityLoading(false);
-    }
-  };
+  const insights   = live?.insights   ?? PLACEHOLDER_INSIGHTS;
 
   return (
     <motion.main
@@ -186,7 +164,7 @@ export default function Results() {
       initial="hidden"
       animate="visible"
     >
-      {/* Hero row — check animation + title + download */}
+      {/* Hero row */}
       <motion.div className="results__hero-row" variants={staggerChild}>
         <SuccessCheck />
         <div className="results__hero-text">
@@ -204,11 +182,7 @@ export default function Results() {
       </motion.div>
 
       {/* KPI cards */}
-      <motion.section
-        className="results__kpi-row"
-        aria-label="Key metrics"
-        variants={cardStagger(0.12)}
-      >
+      <motion.section className="results__kpi-row" aria-label="Key metrics" variants={cardStagger(0.12)}>
         <motion.div variants={cardChild}>
           <KPICard label="Weeks to Goal"    rawValue={kpi.weeks_to_goal}    decimals={1} />
         </motion.div>
@@ -242,16 +216,7 @@ export default function Results() {
 
       <motion.section className="results__section" aria-label="Sensitivity analysis" variants={staggerChild}>
         <h2 className="results__section-title">Sensitivity</h2>
-        {routeState?.formPayload && (
-          <button
-            className="results__sensitivity-btn"
-            onClick={handleSensitivity}
-            disabled={sensitivityLoading}
-          >
-            {sensitivityLoading ? 'Calculating…' : 'What if I add 1 more gym day?'}
-          </button>
-        )}
-        <SensitivityPanel insights={sensitivityInsights ?? PLACEHOLDER_INSIGHTS} />
+        <SensitivityPanel insights={insights} />
       </motion.section>
     </motion.main>
   );

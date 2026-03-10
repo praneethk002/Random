@@ -9,11 +9,6 @@ import ScreenPreferences from '../components/onboarding/ScreenPreferences';
 import './Onboarding.css';
 
 const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5hr': 1.5 };
-const GOAL_MAP: Record<GoalType, string> = {
-  weight_loss: 'weight_loss',
-  muscle_gain: 'muscle_gain',
-  body_recomposition: 'time_min',
-};
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 const SCREEN_VARIANTS = {
@@ -62,7 +57,7 @@ export default function Onboarding() {
     );
 
     const payload = {
-      goal: GOAL_MAP[goal],
+      goal: goal,
       weight_kg: parseFloat(bodyData.startWeight),
       target_kg: parseFloat(bodyData.targetWeight),
       weeks: parseInt(bodyData.weeks, 10),
@@ -74,7 +69,7 @@ export default function Onboarding() {
     };
 
     setApiError(null);
-    const res = await fetch('/api/optimise', {
+    const res = await fetch('/api/optimize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

@@ -7,12 +7,14 @@ import ScreenAbout, { type AboutData } from '../components/onboarding/ScreenAbou
 import ScreenBody, { type BodyData } from '../components/onboarding/ScreenBody';
 import ScreenPreferences from '../components/onboarding/ScreenPreferences';
 import './Onboarding.css';
+import { useOptimise } from '../hooks/useOptimise';
+import type { OptimiseRequest } from '../api/fitopt';
 
 const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5hr': 1.5 };
-const GOAL_MAP: Record<GoalType, string> = {
+const GOAL_MAP: Record<GoalType, OptimiseRequest['goal']> = {
   weight_loss: 'weight_loss',
   muscle_gain: 'muscle_gain',
-  body_recomposition: 'time_min',
+  body_recomposition: 'body_recomposition',
 };
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
@@ -42,7 +44,7 @@ export default function Onboarding() {
   const [direction, setDirection] = useState(1);
   const [goal, setGoal] = useState<GoalType | null>(null);
   const [bodyData, setBodyData] = useState<BodyData | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const { run, loading, error } = useOptimise();
 
   const goNext = () => {
     setDirection(1);
@@ -73,20 +75,12 @@ export default function Onboarding() {
       availability,
     };
 
-    setApiError(null);
-    const res = await fetch('/api/optimise', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message ?? `Server error ${res.status}`);
+    try {
+      const data = await run(payload);
+      navigate('/results', { state: { apiResponse: data, formPayload: payload } });
+    } catch {
+      // error is exposed via hook state
     }
-
-    const data = await res.json();
-    navigate('/results', { state: { apiResponse: data, formPayload: payload } });
   };
 
   return (
@@ -125,7 +119,7 @@ export default function Onboarding() {
               <ScreenPreferences
                 onBack={goBack}
                 onSubmit={handleSubmit}
-                error={apiError}
+                error={error ?? (loading ? 'Optimising your plan…' : null)}
               />
             )}
           </motion.div>

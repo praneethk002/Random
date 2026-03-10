@@ -1,0 +1,6 @@
+exercise,exercise_type,duration_hours,calories_per_hour,min_fitness_level
+treadmill_walk,cardio,0.75,320,beginner
+cycling,cardio,1.0,420,beginner
+upper_body_compound,upper,1.0,300,beginner
+lower_body_compound,legs,1.0,320,beginner
+mobility,rest,0.5,120,beginner

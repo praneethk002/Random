@@ -3,6 +3,7 @@ import Nav from './components/common/Nav';
 import Landing from './pages/Landing';
 import Onboarding from './pages/Onboarding';
 import Results from './pages/Results';
+import About from './pages/About';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </BrowserRouter>
   );

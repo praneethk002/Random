@@ -1,8 +1,14 @@
 # dependencies
 node_modules/
+frontend/node_modules/
 
 # build output
 dist/
+frontend/dist/
+
+# python cache
+__pycache__/
+*.pyc
 
 # local env files
 .env

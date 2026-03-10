@@ -14,6 +14,11 @@ const GOAL_MAP: Record<GoalType, string> = {
   muscle_gain: 'muscle_gain',
   body_recomposition: 'body_recomposition',
 };
+const ACTIVITY_TO_FITNESS: Record<string, string> = {
+  '1-2': 'beginner',
+  '3-4': 'intermediate',
+  '5+': 'advanced',
+};
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 const SCREEN_VARIANTS = {
@@ -41,6 +46,7 @@ export default function Onboarding() {
   const [currentScreen, setCurrentScreen] = useState(1);
   const [direction, setDirection] = useState(1);
   const [goal, setGoal] = useState<GoalType | null>(null);
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [bodyData, setBodyData] = useState<BodyData | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -54,7 +60,7 @@ export default function Onboarding() {
     setCurrentScreen((s) => s - 1);
   };
 
-  const handleSubmit = async (prefs: { restrictions: string[] }) => {
+  const handleSubmit = async (prefs: { restrictions: string[]; enjoyCategories: string[]; avoidCategories: string[] }) => {
     if (!goal || !bodyData) return;
 
     const availability = Object.fromEntries(
@@ -69,8 +75,16 @@ export default function Onboarding() {
       budget_day: 10,
       gym_days: bodyData.selectedDays.length,
       time_per_session: SESSION_HOURS[bodyData.sessionLength ?? '1hr'],
-      dietary_restrictions: prefs.restrictions,
+      dietary_restrictions: prefs.restrictions
+        .filter((r) => r !== 'none')
+        .map((r) => r.replace(/-/g, '_')),
+      food_preferences_enjoy: prefs.enjoyCategories,
+      food_preferences_avoid: prefs.avoidCategories,
       availability,
+      age: aboutData ? parseInt(aboutData.age, 10) : 26,
+      height_cm: aboutData ? parseFloat(aboutData.height) : 182,
+      sex: aboutData?.sex ?? 'male',
+      fitness_level: aboutData ? (ACTIVITY_TO_FITNESS[aboutData.activityLevel ?? '1-2'] ?? 'beginner') : 'beginner',
     };
 
     setApiError(null);
@@ -82,7 +96,7 @@ export default function Onboarding() {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error((err as { message?: string }).message ?? `Server error ${res.status}`);
+      throw new Error((err as { error?: string }).error ?? `Server error ${res.status}`);
     }
 
     const data = await res.json();
@@ -110,7 +124,7 @@ export default function Onboarding() {
             )}
             {currentScreen === 2 && (
               <ScreenAbout
-                onNext={(_data: AboutData) => goNext()}
+                onNext={(data: AboutData) => { setAboutData(data); goNext(); }}
                 onBack={goBack}
               />
             )}

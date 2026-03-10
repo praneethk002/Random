@@ -51,12 +51,6 @@ interface ApiResponse {
 
 // ── Transform helpers ──
 
-const DAY_KEYS: Record<string, keyof WorkoutSchedule> = {
-  Mon: 'monday', Tue: 'tuesday', Wed: 'wednesday', Thu: 'thursday',
-  Fri: 'friday', Sat: 'saturday', Sun: 'sunday',
-};
-const MEAL_NAMES = ['Breakfast', 'Snack', 'Lunch', 'Snack', 'Dinner', 'Evening'];
-
 function transformResponse(api: ApiResponse) {
   const kpi: KPISummary = {
     weeks_to_goal: api.summary.weeks_to_goal,
@@ -81,8 +75,8 @@ function transformResponse(api: ApiResponse) {
     friday: null, saturday: null, sunday: null,
   };
   for (const [day, entries] of Object.entries(api.workout_schedule)) {
-    const key = DAY_KEYS[day];
-    if (!key || !entries.length) continue;
+    const key = day as keyof WorkoutSchedule;
+    if (!entries.length) continue;
     schedule[key] = entries.map((e) => ({
       exercise: e.exercise,
       sets: e.sets,
@@ -157,11 +151,19 @@ export default function Results() {
 
   const live = routeState?.apiResponse ? transformResponse(routeState.apiResponse) : null;
 
-  const kpi        = live?.kpi        ?? PLACEHOLDER_KPI;
-  const meals      = live?.meals      ?? PLACEHOLDER_MEALS;
-  const schedule   = live?.schedule   ?? PLACEHOLDER_SCHEDULE;
-  const macros     = live?.macros     ?? PLACEHOLDER_MACROS;
-  const projection = live?.projection ?? PLACEHOLDER_PROJECTION;
+  const kpi      = live?.kpi      ?? PLACEHOLDER_KPI;
+  const meals    = live?.meals    ?? PLACEHOLDER_MEALS;
+  const schedule = live?.schedule ?? PLACEHOLDER_SCHEDULE;
+  const macros   = live?.macros   ?? PLACEHOLDER_MACROS;
+  const startWeight = typeof routeState?.formPayload?.weight_kg === 'number'
+    ? routeState.formPayload.weight_kg
+    : null;
+  const projection = live
+    ? [
+        ...(startWeight !== null ? [{ week: 0, weight_kg: startWeight }] : []),
+        ...live.projection,
+      ]
+    : PLACEHOLDER_PROJECTION;
 
   const [sensitivityInsights, setSensitivityInsights] = useState<SensitivityInsight[] | null>(null);
   const [sensitivityLoading, setSensitivityLoading] = useState(false);

@@ -22,39 +22,53 @@ const DIET_AVOID_MAP: Record<string, string[]> = {
   halal:         ['pork', 'bacon', 'lard', 'gelatin'],
 };
 
+// Maps UI food tag IDs to backend food category names.
+const FOOD_TO_CATEGORY: Record<string, string> = {
+  chicken:       'lean_protein',
+  rice:          'grains',
+  eggs:          'protein',
+  salmon:        'fish',
+  tuna:          'fish',
+  broccoli:      'vegetables',
+  oats:          'grains',
+  'greek-yogurt':'dairy',
+  'sweet-potato':'carb_source',
+  banana:        'fruit',
+  dairy:         'dairy',
+  'eggs-avoid':  'protein',
+};
+
 const ENJOY_SUGGESTIONS = [
-  { id: 'chicken', label: 'Chicken' },
-  { id: 'rice', label: 'Rice' },
-  { id: 'eggs', label: 'Eggs' },
-  { id: 'salmon', label: 'Salmon' },
-  { id: 'broccoli', label: 'Broccoli' },
-  { id: 'oats', label: 'Oats' },
-  { id: 'greek-yogurt', label: 'Greek Yogurt' },
-  { id: 'sweet-potato', label: 'Sweet Potato' },
-  { id: 'tuna', label: 'Tuna' },
-  { id: 'banana', label: 'Banana' },
+  { id: 'chicken',       label: 'Chicken'      },
+  { id: 'rice',          label: 'Rice'         },
+  { id: 'eggs',          label: 'Eggs'         },
+  { id: 'salmon',        label: 'Salmon'       },
+  { id: 'broccoli',      label: 'Broccoli'     },
+  { id: 'oats',          label: 'Oats'         },
+  { id: 'greek-yogurt',  label: 'Greek Yogurt' },
+  { id: 'sweet-potato',  label: 'Sweet Potato' },
+  { id: 'tuna',          label: 'Tuna'         },
+  { id: 'banana',        label: 'Banana'       },
 ];
 
 const AVOID_SUGGESTIONS = [
-  { id: 'nuts', label: 'Nuts' },
-  { id: 'shellfish', label: 'Shellfish' },
-  { id: 'pork', label: 'Pork' },
-  { id: 'beef', label: 'Beef' },
-  { id: 'dairy', label: 'Dairy' },
-  { id: 'gluten', label: 'Gluten' },
-  { id: 'soy', label: 'Soy' },
-  { id: 'eggs-avoid', label: 'Eggs' },
+  { id: 'dairy',      label: 'Dairy'     },
+  { id: 'eggs-avoid', label: 'Eggs'      },
+  { id: 'salmon',     label: 'Fish'      },
+  { id: 'oats',       label: 'Grains'    },
+  { id: 'chicken',    label: 'Meat'      },
+  { id: 'banana',     label: 'Fruit'     },
 ];
 
 interface ScreenPreferencesProps {
   onBack: () => void;
-  onSubmit: (prefs: { restrictions: string[] }) => Promise<void>;
+  onSubmit: (prefs: { restrictions: string[]; enjoyCategories: string[]; avoidCategories: string[] }) => Promise<void>;
   error?: string | null;
 }
 
 export default function ScreenPreferences({ onBack, onSubmit, error }: ScreenPreferencesProps) {
   const [restrictions, setRestrictions] = useState<string[]>([]);
-  const [_enjoyTags, setEnjoyTags] = useState<Tag[]>([]);
+  const [enjoyTags, setEnjoyTags] = useState<Tag[]>([]);
   const [avoidTags, setAvoidTags] = useState<Tag[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -120,7 +134,13 @@ export default function ScreenPreferences({ onBack, onSubmit, error }: ScreenPre
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await onSubmit({ restrictions });
+      const toCategories = (tags: Tag[]) =>
+        [...new Set(tags.map((t) => FOOD_TO_CATEGORY[t.id]).filter(Boolean))];
+      await onSubmit({
+        restrictions,
+        enjoyCategories: toCategories(enjoyTags),
+        avoidCategories: toCategories(controlledAvoidTags),
+      });
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
     } finally {

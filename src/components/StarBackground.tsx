@@ -1,15 +1,23 @@
 import { useMemo } from 'react';
 
+const seed = (n: number) => ((Math.sin(n * 127.1 + 311.7) * 43758.5453) % 1 + 1) % 1;
+
+const SIZES = ['2px', '2.5px', '3px'];
+const COLORS = [
+  'rgba(13,148,136,0.7)',
+  'rgba(124,58,237,0.6)',
+  'rgba(13,148,136,0.45)',
+  'rgba(255,255,255,0.5)',
+];
+
 export default function StarBackground() {
-  const dots = useMemo(() => Array.from({ length: 80 }, (_, i) => ({
-    left: `${(i * 37 + i * i * 13) % 100}%`,
-    top: `${(i * 53 + i * 7) % 100}%`,
-    background: i % 3 === 0
-      ? 'rgba(13,148,136,0.5)'
-      : i % 3 === 1
-      ? 'rgba(124,58,237,0.4)'
-      : 'rgba(13,148,136,0.3)',
-    animationDelay: `${(i * 0.3) % 4}s`,
+  const dots = useMemo(() => Array.from({ length: 120 }, (_, i) => ({
+    left: `${seed(i * 3 + 1) * 100}%`,
+    top: `${seed(i * 7 + 2) * 100}%`,
+    width: SIZES[i % 3],
+    height: SIZES[i % 3],
+    background: COLORS[i % 4],
+    animationDelay: `${seed(i * 11 + 5) * 5}s`,
   })), []);
 
   return (

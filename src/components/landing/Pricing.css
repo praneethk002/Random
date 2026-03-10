@@ -6,6 +6,12 @@
   border-top: 1px solid var(--color-border);
 }
 
+@media (max-width: 768px) {
+  .pricing {
+    padding: var(--space-20) var(--space-5);
+  }
+}
+
 .pricing__inner {
   max-width: 1100px;
   margin: 0 auto;

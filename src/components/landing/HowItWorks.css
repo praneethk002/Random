@@ -235,6 +235,36 @@
   50%       { opacity: 0; }
 }
 
+@media (max-width: 768px) {
+  .hiw {
+    padding: var(--space-20) var(--space-5);
+  }
+
+  .hiw__body {
+    grid-template-columns: 1fr;
+  }
+
+  .hiw__line {
+    display: none;
+  }
+
+  .hiw-step {
+    grid-template-columns: 1fr;
+  }
+
+  .hiw-step--reverse {
+    direction: ltr;
+  }
+
+  .hiw-step__number {
+    font-size: 48px;
+  }
+
+  .hiw-plan-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Plan cards (Step 3) ── */
 .hiw-plan-cards {
   display: grid;

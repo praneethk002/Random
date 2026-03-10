@@ -1,25 +1,13 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import ProgressBar from '../components/onboarding/ProgressBar';
 import ScreenGoal, { type GoalType } from '../components/onboarding/ScreenGoal';
 import ScreenAbout, { type AboutData } from '../components/onboarding/ScreenAbout';
 import ScreenBody, { type BodyData } from '../components/onboarding/ScreenBody';
 import ScreenPreferences from '../components/onboarding/ScreenPreferences';
+import type { FitnessRequest } from '../types/api';
 import './Onboarding.css';
-
-const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5hr': 1.5 };
-const GOAL_MAP: Record<GoalType, string> = {
-  weight_loss: 'weight_loss',
-  muscle_gain: 'muscle_gain',
-  body_recomposition: 'body_recomposition',
-};
-const ACTIVITY_TO_FITNESS: Record<string, string> = {
-  '1-2': 'beginner',
-  '3-4': 'intermediate',
-  '5+': 'advanced',
-};
-const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 const SCREEN_VARIANTS = {
   enter: (direction: number) => ({
@@ -48,7 +36,6 @@ export default function Onboarding() {
   const [goal, setGoal] = useState<GoalType | null>(null);
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [bodyData, setBodyData] = useState<BodyData | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
 
   const goNext = () => {
     setDirection(1);
@@ -60,47 +47,42 @@ export default function Onboarding() {
     setCurrentScreen((s) => s - 1);
   };
 
-  const handleSubmit = async (prefs: { restrictions: string[]; enjoyCategories: string[]; avoidCategories: string[] }) => {
-    if (!goal || !bodyData) return;
+  const handleSubmit = async (
+    restrictions: string[],
+    avoidTags: string[],
+    enjoyTags: string[],
+  ) => {
+    if (!goal || !aboutData || !bodyData) return;
 
-    const availability = Object.fromEntries(
-      ALL_DAYS.map((day) => [day, bodyData.selectedDays.includes(day as typeof ALL_DAYS[number]) ? 1 : 0])
-    );
-
-    const payload = {
-      goal: GOAL_MAP[goal],
-      weight_kg: parseFloat(bodyData.startWeight),
-      target_kg: parseFloat(bodyData.targetWeight),
+    const payload: FitnessRequest = {
+      goal,
+      sex: aboutData.sex ?? 'male',
+      age: parseInt(aboutData.age, 10),
+      height_cm: parseFloat(aboutData.height),
+      activity_level: aboutData.activityLevel ?? '3-4',
+      start_weight_kg: parseFloat(bodyData.startWeight),
+      target_weight_kg: parseFloat(bodyData.targetWeight),
       weeks: parseInt(bodyData.weeks, 10),
-      budget_day: 10,
-      gym_days: bodyData.selectedDays.length,
-      time_per_session: SESSION_HOURS[bodyData.sessionLength ?? '1hr'],
-      dietary_restrictions: prefs.restrictions
-        .filter((r) => r !== 'none')
-        .map((r) => r.replace(/-/g, '_')),
-      food_preferences_enjoy: prefs.enjoyCategories,
-      food_preferences_avoid: prefs.avoidCategories,
-      availability,
-      age: aboutData ? parseInt(aboutData.age, 10) : 26,
-      height_cm: aboutData ? parseFloat(aboutData.height) : 182,
-      sex: aboutData?.sex ?? 'male',
-      fitness_level: aboutData ? (ACTIVITY_TO_FITNESS[aboutData.activityLevel ?? '1-2'] ?? 'beginner') : 'beginner',
+      gym_days: bodyData.selectedDays.map((d) => d.toLowerCase()),
+      session_length: bodyData.sessionLength ?? '1hr',
+      dietary_restrictions: restrictions,
+      foods_avoid: avoidTags,
+      foods_enjoy: enjoyTags,
     };
 
-    setApiError(null);
-    const res = await fetch('/api/optimise', {
+    const response = await fetch('/api/fitness-plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error((err as { error?: string }).error ?? `Server error ${res.status}`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error ?? `HTTP ${response.status}`);
     }
 
-    const data = await res.json();
-    navigate('/results', { state: { apiResponse: data, formPayload: payload } });
+    const data = await response.json();
+    navigate('/results', { state: { data } });
   };
 
   return (
@@ -139,7 +121,6 @@ export default function Onboarding() {
               <ScreenPreferences
                 onBack={goBack}
                 onSubmit={handleSubmit}
-                error={apiError}
               />
             )}
           </motion.div>

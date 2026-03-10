@@ -1,115 +1,18 @@
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useLocation } from 'react-router-dom';
 import KPICard from '../components/results/KPICard';
 import MealTable from '../components/results/MealTable';
 import WorkoutCalendar from '../components/results/WorkoutCalendar';
 import MacroPieChart from '../components/results/MacroPieChart';
 import WeightLineChart from '../components/results/WeightLineChart';
 import SensitivityPanel from '../components/results/SensitivityPanel';
-import {
-  PLACEHOLDER_KPI,
-  PLACEHOLDER_MEALS,
-  PLACEHOLDER_SCHEDULE,
-  PLACEHOLDER_MACROS,
-  PLACEHOLDER_PROJECTION,
-  PLACEHOLDER_INSIGHTS,
-  type KPISummary,
-  type MealItem,
-  type WorkoutSchedule,
-  type MacroData,
-  type ProjectionPoint,
-  type SensitivityInsight,
-} from '../data/placeholders';
+import { PLACEHOLDER_KPI } from '../data/placeholders';
+import type { FitnessResponse } from '../types/api';
 import { staggerContainer, staggerChild, cardStagger, cardChild } from '../tokens/variants';
 import './Results.css';
 
-// ── API response shape (matches contract from POST /api/optimise) ──
-
-interface ApiMealItem {
-  meal: string; food: string; grams: number;
-  calories: number; protein: number; carbs: number; fat: number;
-}
-
-interface ApiWorkoutEntry {
-  exercise: string; sets: number; reps: number;
-  duration_min: number; muscle_group: string;
-}
-
-interface ApiResponse {
-  summary: {
-    weeks_to_goal: number;
-    daily_calories: number;
-    weekly_food_cost: number;
-    weekly_gym_hours: number;
-  };
-  meal_plan: Record<string, ApiMealItem[]>;
-  workout_schedule: Record<string, ApiWorkoutEntry[]>;
-  projection: Array<{ week: number; weight_kg: number }>;
-}
-
-// ── Transform helpers ──
-
-function transformResponse(api: ApiResponse) {
-  const kpi: KPISummary = {
-    weeks_to_goal: api.summary.weeks_to_goal,
-    daily_calories: api.summary.daily_calories,
-    weekly_gym_hours: api.summary.weekly_gym_hours,
-  };
-
-  // meal_plan is keyed by day; flatten to a single list
-  const allMealItems = Object.values(api.meal_plan).flat();
-  const meals: MealItem[] = allMealItems.map((item) => ({
-    meal: item.meal,
-    food: item.food,
-    grams: item.grams,
-    calories: item.calories,
-    protein: item.protein,
-    carbs: item.carbs,
-    fat: item.fat,
-  }));
-
-  const schedule: WorkoutSchedule = {
-    monday: null, tuesday: null, wednesday: null, thursday: null,
-    friday: null, saturday: null, sunday: null,
-  };
-  for (const [day, entries] of Object.entries(api.workout_schedule)) {
-    const key = day as keyof WorkoutSchedule;
-    if (!entries.length) continue;
-    schedule[key] = entries.map((e) => ({
-      exercise: e.exercise,
-      sets: e.sets,
-      reps: String(e.reps),
-      duration_min: e.duration_min,
-      muscle_group: e.muscle_group,
-    }));
-  }
-
-  // Compute macro totals from Monday's meals (representative day)
-  const mondayItems = api.meal_plan['monday'] ?? allMealItems;
-  const totalProtein = mondayItems.reduce((s, i) => s + i.protein, 0);
-  const totalCarbs   = mondayItems.reduce((s, i) => s + i.carbs, 0);
-  const totalFat     = mondayItems.reduce((s, i) => s + i.fat, 0);
-  const macroTotal   = totalProtein + totalCarbs + totalFat;
-  const macros: MacroData = macroTotal > 0
-    ? {
-        protein_pct: Math.round((totalProtein / macroTotal) * 100),
-        carbs_pct:   Math.round((totalCarbs   / macroTotal) * 100),
-        fat_pct:     Math.round((totalFat      / macroTotal) * 100),
-      }
-    : PLACEHOLDER_MACROS;
-
-  const projection: ProjectionPoint[] = api.projection.map((p) => ({
-    week: p.week,
-    weight_kg: p.weight_kg,
-  }));
-
-  return { kpi, meals, schedule, macros, projection };
-}
-
-// ── SVG success animation ──
-
+/* ── SVG success animation ── */
 const CIRCLE_R = 36;
 const CIRCLE_C = 2 * Math.PI * CIRCLE_R;
 
@@ -140,57 +43,11 @@ function SuccessCheck() {
   );
 }
 
-// ── Main component ──
-
 export default function Results() {
   const location = useLocation();
-  const routeState = location.state as {
-    apiResponse?: ApiResponse;
-    formPayload?: Record<string, unknown>;
-  } | null;
+  const apiData: FitnessResponse | null = (location.state as { data?: FitnessResponse } | null)?.data ?? null;
 
-  const live = routeState?.apiResponse ? transformResponse(routeState.apiResponse) : null;
-
-  const kpi      = live?.kpi      ?? PLACEHOLDER_KPI;
-  const meals    = live?.meals    ?? PLACEHOLDER_MEALS;
-  const schedule = live?.schedule ?? PLACEHOLDER_SCHEDULE;
-  const macros   = live?.macros   ?? PLACEHOLDER_MACROS;
-  const startWeight = typeof routeState?.formPayload?.weight_kg === 'number'
-    ? routeState.formPayload.weight_kg
-    : null;
-  const projection = live
-    ? [
-        ...(startWeight !== null ? [{ week: 0, weight_kg: startWeight }] : []),
-        ...live.projection,
-      ]
-    : PLACEHOLDER_PROJECTION;
-
-  const [sensitivityInsights, setSensitivityInsights] = useState<SensitivityInsight[] | null>(null);
-  const [sensitivityLoading, setSensitivityLoading] = useState(false);
-
-  const handleSensitivity = async () => {
-    if (!routeState?.formPayload) return;
-    setSensitivityLoading(true);
-    try {
-      const res = await fetch('/api/sensitivity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(routeState.formPayload),
-      });
-      if (res.ok) {
-        const delta = await res.json() as { weeks_to_goal?: number };
-        const change = delta.weeks_to_goal != null
-          ? (delta.weeks_to_goal - kpi.weeks_to_goal).toFixed(1)
-          : null;
-        const sign = change && parseFloat(change) < 0 ? '' : '+';
-        setSensitivityInsights([
-          { id: 'gym-day', text: `+1 gym day: ${sign}${change ?? '—'} weeks to goal` },
-        ]);
-      }
-    } finally {
-      setSensitivityLoading(false);
-    }
-  };
+  const kpi = apiData?.summary ?? PLACEHOLDER_KPI;
 
   return (
     <motion.main
@@ -235,36 +92,31 @@ export default function Results() {
 
       <motion.section className="results__section" aria-label="Macro breakdown" variants={staggerChild}>
         <h2 className="results__section-title">Macro Breakdown</h2>
-        <MacroPieChart macros={macros} />
+        <MacroPieChart />
       </motion.section>
 
       <motion.section className="results__section" aria-label="Meal plan" variants={staggerChild}>
         <h2 className="results__section-title">Meal Plan</h2>
-        <MealTable data={meals} />
+        <div className="results__table-wrapper">
+          <MealTable />
+        </div>
       </motion.section>
 
       <motion.section className="results__section" aria-label="Workout schedule" variants={staggerChild}>
         <h2 className="results__section-title">Workout Schedule</h2>
-        <WorkoutCalendar schedule={schedule} />
+        <div className="results__workout-wrapper">
+          <WorkoutCalendar />
+        </div>
       </motion.section>
 
       <motion.section className="results__section" aria-label="Weight projection" variants={staggerChild}>
         <h2 className="results__section-title">Weight Projection</h2>
-        <WeightLineChart projection={projection} />
+        <WeightLineChart />
       </motion.section>
 
       <motion.section className="results__section" aria-label="Sensitivity analysis" variants={staggerChild}>
         <h2 className="results__section-title">Sensitivity</h2>
-        {routeState?.formPayload && (
-          <button
-            className="results__sensitivity-btn"
-            onClick={handleSensitivity}
-            disabled={sensitivityLoading}
-          >
-            {sensitivityLoading ? 'Calculating…' : 'What if I add 1 more gym day?'}
-          </button>
-        )}
-        <SensitivityPanel insights={sensitivityInsights ?? PLACEHOLDER_INSIGHTS} />
+        <SensitivityPanel />
       </motion.section>
     </motion.main>
   );

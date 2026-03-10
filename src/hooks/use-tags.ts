@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export interface Tag {
   id: string;
@@ -9,33 +9,31 @@ interface UseTagsOptions {
   defaultTags?: Tag[];
   maxTags?: number;
   onChange?: (tags: Tag[]) => void;
-  /** When provided, overrides internal state with this tag list */
-  controlledTags?: Tag[];
 }
 
-export function useTags({ defaultTags = [], maxTags, onChange, controlledTags }: UseTagsOptions = {}) {
+export function useTags({ defaultTags = [], maxTags, onChange }: UseTagsOptions = {}) {
   const [tags, setTags] = useState<Tag[]>(defaultTags);
-
-  useEffect(() => {
-    if (controlledTags !== undefined) {
-      setTags(controlledTags);
-    }
-  }, [controlledTags]);
   const [inputValue, setInputValue] = useState('');
-
-  useEffect(() => {
-    onChange?.(tags);
-  }, [tags]); // eslint-disable-line react-hooks/exhaustive-deps
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   const addTag = useCallback((tag: Tag) => {
-    if (maxTags && tags.length >= maxTags) return;
-    if (tags.find(t => t.id === tag.id)) return;
-    setTags(prev => [...prev, tag]);
+    setTags(prev => {
+      if (maxTags && prev.length >= maxTags) return prev;
+      if (prev.find(t => t.id === tag.id)) return prev;
+      const next = [...prev, tag];
+      onChangeRef.current?.(next);
+      return next;
+    });
     setInputValue('');
-  }, [tags, maxTags]);
+  }, [maxTags]);
 
   const removeTag = useCallback((tagId: string) => {
-    setTags(prev => prev.filter(t => t.id !== tagId));
+    setTags(prev => {
+      const next = prev.filter(t => t.id !== tagId);
+      onChangeRef.current?.(next);
+      return next;
+    });
   }, []);
 
   const handleInputChange = useCallback((value: string) => {

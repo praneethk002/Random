@@ -38,3 +38,9 @@
   text-align: center;
   letter-spacing: 0.5px;
 }
+
+@media (max-width: 768px) {
+  .stats-bar {
+    padding: var(--space-10) var(--space-5);
+  }
+}

@@ -1,19 +1,13 @@
 from __future__ import annotations
 
+import traceback
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
-from fitness_backend import (
-    VALID_GOALS,
-    build_default_profile,
-    get_foods_df,
-    get_exercises_df,
-    get_model_counts,
-    normalize_profile,
-    run_fitopt_pipeline,
-    run_sensitivity_extra_gym_day,
-)
+from fitness_backend import VALID_GOALS, build_default_profile, get_model_counts, run_fitopt_pipeline
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.get("/api/model-metadata")
@@ -34,38 +28,30 @@ def model_metadata():
 
 @app.post("/api/fitness-plan")
 @app.post("/api/optimize")
-@app.post("/api/optimise")
 def optimize_fitness_plan():
     payload = request.get_json(silent=True) or {}
+
+    if 'gym_days' in payload and isinstance(payload['gym_days'], list):
+        payload['gym_days'] = len(payload['gym_days'])
+    if 'start_weight_kg' in payload:
+        payload['weight_kg'] = payload.pop('start_weight_kg')
+    if 'target_weight_kg' in payload:
+        payload['target_kg'] = payload.pop('target_weight_kg')
+    if 'height_cm' in payload:
+        payload['height'] = payload.pop('height_cm')
+    if 'session_length' in payload:
+        payload['session_duration_min'] = payload.pop('session_length')
+
     try:
         result = run_fitopt_pipeline(payload)
         return jsonify(result)
     except ValueError as exc:
-        return (
-            jsonify(
-                {
-                    "error": str(exc),
-                    "valid_goals": list(VALID_GOALS),
-                }
-            ),
-            400,
-        )
+        traceback.print_exc()
+        return jsonify({"error": str(exc), "valid_goals": list(VALID_GOALS)}), 400
     except Exception as exc:
-        return jsonify({"error": "internal_server_error", "detail": str(exc)}), 500
-
-
-@app.post("/api/sensitivity")
-def sensitivity():
-    payload = request.get_json(silent=True) or {}
-    try:
-        profile = normalize_profile(payload)
-        result = run_sensitivity_extra_gym_day(profile, get_foods_df(), get_exercises_df())
-        return jsonify({"weeks_to_goal": result["new_weeks_to_goal"]})
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    except Exception as exc:
+        traceback.print_exc()
         return jsonify({"error": "internal_server_error", "detail": str(exc)}), 500
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

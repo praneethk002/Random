@@ -14,6 +14,12 @@
   color: white;
 }
 
+@media (max-width: 768px) {
+  .footer-cta {
+    padding: var(--space-20) var(--space-5);
+  }
+}
+
 .footer-cta__inner {
   max-width: 1100px;
   margin: 0 auto;

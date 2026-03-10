@@ -20,6 +20,7 @@ const SECTION_IDS = NAV_LINKS.map((l) => l.sectionId);
 
 export default function Nav() {
   const [activeSection, setActiveSection] = useState<string>('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,37 +44,68 @@ export default function Nav() {
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMenuOpen(false);
   };
 
   return (
-    <nav className="nav">
-      <Link to="/" className="nav__logo">
-        <span className="nav__logo-opti">Opti</span>
-        <span className="nav__logo-fit">Fit</span>
-      </Link>
+    <>
+      <nav className="nav">
+        <Link to="/" className="nav__logo">
+          <span className="nav__logo-opti">Opti</span>
+          <span className="nav__logo-fit">Fit</span>
+        </Link>
 
-      <ul className="nav__links">
-        {NAV_LINKS.map(({ label, sectionId }) => {
-          const isActive = activeSection === sectionId;
-          return (
-            <li key={sectionId}>
-              <button
-                type="button"
-                className={`nav__link${isActive ? ' nav__link--active' : ''}`}
-                onClick={() => scrollTo(sectionId)}
-              >
-                {isActive && <span className="nav__link-dot" aria-hidden="true" />}
-                {label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+        <ul className="nav__links">
+          {NAV_LINKS.map(({ label, sectionId }) => {
+            const isActive = activeSection === sectionId;
+            return (
+              <li key={sectionId}>
+                <button
+                  type="button"
+                  className={`nav__link${isActive ? ' nav__link--active' : ''}`}
+                  onClick={() => scrollTo(sectionId)}
+                >
+                  {isActive && <span className="nav__link-dot" aria-hidden="true" />}
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-      <Link to="/onboarding" className="nav__cta">
-        <ArrowRight size={14} />
-        Try OptiFit
-      </Link>
-    </nav>
+        <div className="nav__right">
+          <Link to="/onboarding" className="nav__cta">
+            <ArrowRight size={14} />
+            Try OptiFit
+          </Link>
+          <button
+            type="button"
+            className={`nav__hamburger${menuOpen ? ' nav__hamburger--open' : ''}`}
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+          >
+            <span className="nav__hamburger-line" />
+            <span className="nav__hamburger-line" />
+            <span className="nav__hamburger-line" />
+          </button>
+        </div>
+      </nav>
+
+      {menuOpen && (
+        <div className="nav__mobile-menu">
+          {NAV_LINKS.map(({ label, sectionId }) => (
+            <button
+              key={sectionId}
+              type="button"
+              className="nav__mobile-link"
+              onClick={() => scrollTo(sectionId)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

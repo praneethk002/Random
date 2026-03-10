@@ -12,15 +12,13 @@
 /* Static star dots — rendered by StarBackground component */
 .star-dot {
   position: absolute;
-  width: 2px;
-  height: 2px;
   border-radius: 50%;
   animation: star-pulse 4s ease-in-out infinite;
 }
 
 @keyframes star-pulse {
   0%, 100% { opacity: 0.4; transform: scale(1); }
-  50%       { opacity: 1;   transform: scale(1.5); }
+  50%       { opacity: 1;   transform: scale(2); }
 }
 
 /* Shooting stars SVG overlay */
@@ -115,4 +113,22 @@
   display: flex;
   gap: var(--space-4);
   flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--space-20) var(--space-5);
+  }
+
+  .hero__ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero__ctas a,
+  .hero__ctas button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
 }

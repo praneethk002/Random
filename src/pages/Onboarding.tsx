@@ -12,7 +12,7 @@ const SESSION_HOURS: Record<string, number> = { '45min': 0.75, '1hr': 1.0, '1.5h
 const GOAL_MAP: Record<GoalType, string> = {
   weight_loss: 'weight_loss',
   muscle_gain: 'muscle_gain',
-  body_recomposition: 'time_min',
+  body_recomposition: 'body_recomposition',
 };
 const ALL_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
@@ -69,12 +69,12 @@ export default function Onboarding() {
       budget_day: 10,
       gym_days: bodyData.selectedDays.length,
       time_per_session: SESSION_HOURS[bodyData.sessionLength ?? '1hr'],
-      dietary_restrictions: prefs.restrictions,
+      dietary_restrictions: prefs.restrictions.map((r) => r.replace(/-/g, '_')),
       availability,
     };
 
     setApiError(null);
-    const res = await fetch('/api/optimise', {
+    const res = await fetch('/api/optimize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
